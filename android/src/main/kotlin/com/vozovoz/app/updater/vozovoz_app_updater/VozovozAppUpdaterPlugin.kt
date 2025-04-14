@@ -80,9 +80,9 @@ class VozovozAppUpdaterPlugin : FlutterPlugin, MethodCallHandler,
 
             val infoMap = HashMap<String, String>()
             infoMap.apply {
-                put("appName", info.applicationInfo.loadLabel(packageManager).toString())
+                put("appName", info.applicationInfo?.loadLabel(packageManager)?.toString() ?: "Unknown")
                 put("packageName", applicationContext!!.packageName)
-                put("version", info.versionName)
+                put("version", info.versionName ?: "N/A")
                 put("buildNumber", getLongVersionCode(info).toString())
             }.also { resultingMap ->
                 result.success(resultingMap)
