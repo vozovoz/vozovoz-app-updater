@@ -59,7 +59,7 @@ class RemoteStoreDataSourceImpl implements RemoteStoreDataSource {
           result.updateAvailability == UPDATE_AILABILITY_AVAILABLE;
       return ObjectResponse<bool, dynamic>.success(data: isAvailable);
     } on Object catch (e) {
-      return const ObjectResponse<bool, dynamic>.error();
+      return ObjectResponse<bool, dynamic>.error(error: e);
     }
   }
 

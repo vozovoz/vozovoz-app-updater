@@ -18,6 +18,8 @@ class UpdaterRepositoryImpl implements UpdaterRepository {
         return checkRustoreVersion();
       case AppInstallationSource.appstore:
         return checkIosUpdate(applicationId, currentVersion);
+      case AppInstallationSource.debug:
+        return UpdateAvailability.unknown;
     }
   }
 
