@@ -7,18 +7,21 @@ class UpdaterRepositoryImpl implements UpdaterRepository {
 
   @override
   Future<UpdateAvailability> checkUpdate(
-      String applicationId, Version currentVersion) async {
-    if (Platform.isIOS) {
-      return checkIosUpdate(applicationId, currentVersion);
+    String applicationId,
+    Version currentVersion,
+    AppInstallationSource source,
+  ) async {
+    switch (source) {
+      case AppInstallationSource.googlePlay:
+        return checkGooglePlay(applicationId, currentVersion);
+      case AppInstallationSource.rustore:
+        return checkRustoreVersion();
+      case AppInstallationSource.appstore:
+        return checkIosUpdate(applicationId, currentVersion);
     }
-    if (Platform.isAndroid) {
-      return checkAndroidUpdate(applicationId, currentVersion);
-    }
-    return UpdateAvailability.unknown;
   }
 
-  @override
-  Future<UpdateAvailability> checkAndroidUpdate(
+  Future<UpdateAvailability> checkGooglePlay(
     String applicationId,
     Version currentVersion,
   ) async {
@@ -33,7 +36,6 @@ class UpdaterRepositoryImpl implements UpdaterRepository {
     return playStoreResult;
   }
 
-  @override
   Future<UpdateAvailability> checkAndroidUpdateFromGoogleService() async {
     final result = await _methodChannel.checkUpdateGoogleService();
     if (result.isSuccessful) {
@@ -43,7 +45,6 @@ class UpdaterRepositoryImpl implements UpdaterRepository {
     return UpdateAvailability.unknown;
   }
 
-  @override
   Future<UpdateAvailability> checkAndroidUpdateFromPlayStore(
     String applicationId,
     Version currentVersion,
@@ -62,7 +63,6 @@ class UpdaterRepositoryImpl implements UpdaterRepository {
     }
   }
 
-  @override
   Future<UpdateAvailability> checkIosUpdate(
     String applicationId,
     Version currentVersion,
@@ -81,6 +81,14 @@ class UpdaterRepositoryImpl implements UpdaterRepository {
     }
   }
 
+  Future<UpdateAvailability> checkRustoreVersion() async {
+    final result = await _remoteStoreDataSource.fetchRustroreUpdate();
+    if (result.data == true) {
+      return UpdateAvailability.updateAvailableRustore;
+    }
+    return UpdateAvailability.updateNotAvailable;
+  }
+
   @override
   Future<void> completeFlexibleUpdate() {
     return _methodChannel.completeFlexibleUpdate();
@@ -94,5 +102,14 @@ class UpdaterRepositoryImpl implements UpdaterRepository {
   @override
   Future<AppUpdateResult> startFlexibleUpdate() {
     return _methodChannel.startFlexibleUpdate();
+  }
+
+  @override
+  Future<AppUpdateResult> performRustoreImmediateUpdate() async {
+    final result = await _remoteStoreDataSource.rustorePerformImmediateUpdate();
+    if (result.isSuccessful) {
+      return AppUpdateResult.success;
+    }
+    return AppUpdateResult.inAppUpdateFailed;
   }
 }

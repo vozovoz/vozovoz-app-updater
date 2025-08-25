@@ -50,4 +50,30 @@ class RemoteStoreDataSourceImpl implements RemoteStoreDataSource {
       return const ObjectResponse<Version, dynamic>.error();
     }
   }
+
+  @override
+  Future<ObjectResponse<bool, dynamic>> fetchRustroreUpdate() async {
+    try {
+      final result = await RustoreUpdateClient.info();
+      bool isAvailable =
+          result.updateAvailability == UPDATE_AILABILITY_AVAILABLE;
+      return ObjectResponse<bool, dynamic>.success(data: isAvailable);
+    } on Object catch (e) {
+      return const ObjectResponse<bool, dynamic>.error();
+    }
+  }
+
+  @override
+  Future<ObjectResponse<void, dynamic>> rustorePerformImmediateUpdate() async {
+    try {
+      final result = await RustoreUpdateClient.immediate();
+      bool isOk = result.code == ACTIVITY_RESULT_OK ||
+          result.code == ACTIVITY_RESULT_CANCELED;
+      return isOk
+          ? const ObjectResponse<void, dynamic>.success()
+          : const ObjectResponse<void, dynamic>.error();
+    } on Object catch (e) {
+      return ObjectResponse<void, dynamic>.error(error: e);
+    }
+  }
 }

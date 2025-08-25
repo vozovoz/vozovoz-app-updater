@@ -1,3 +1,4 @@
+import 'package:vozovoz_app_updater/remote/data/app_installation_source.dart';
 import 'package:vozovoz_app_updater/remote/data/app_update_result.dart';
 import 'package:vozovoz_app_updater/remote/data/package_detail.dart';
 import 'package:vozovoz_app_updater/remote/data/update_availability.dart';
@@ -30,51 +31,22 @@ class VozovozAppUpdater {
     return VozovozAppUpdaterPlatform.instance.getPlatformVersion();
   }
 
-  Future<UpdateAvailability> get checkUpdate async {
+  Future<UpdateAvailability> checkUpdate(AppInstallationSource source) async {
     final packageDetail = await getPackageDetail();
     final applicationId = packageDetail.packageName;
     final version = packageDetail.version;
     return _updaterRepository.checkUpdate(
       applicationId,
       version,
-    );
-  }
-
-  Future<UpdateAvailability> get checkAndroidUpdate async {
-    final packageDetail = await getPackageDetail();
-    final applicationId = packageDetail.packageName;
-    final version = packageDetail.version;
-    return _updaterRepository.checkAndroidUpdate(
-      applicationId,
-      version,
-    );
-  }
-
-  Future<UpdateAvailability> get checkAndroidUpdateFromPlayStore async {
-    final packageDetail = await getPackageDetail();
-    final applicationId = packageDetail.packageName;
-    final version = packageDetail.version;
-    return _updaterRepository.checkAndroidUpdateFromPlayStore(
-      applicationId,
-      version,
-    );
-  }
-
-  Future<UpdateAvailability> get checkAndroidUpdateFromGoogleService {
-    return _updaterRepository.checkAndroidUpdateFromGoogleService();
-  }
-
-  Future<UpdateAvailability> get checkIosUpdate async {
-    final packageDetail = await getPackageDetail();
-    final applicationId = packageDetail.packageName;
-    final version = packageDetail.version;
-    return _updaterRepository.checkIosUpdate(
-      applicationId,
-      version,
+      source,
     );
   }
 
   Future<AppUpdateResult> performImmediateUpdate() {
     return _updaterRepository.performImmediateUpdate();
+  }
+
+  Future<AppUpdateResult> performRustoreImmediateUpdate() {
+    return _updaterRepository.performRustoreImmediateUpdate();
   }
 }

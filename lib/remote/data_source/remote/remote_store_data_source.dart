@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_rustore_update/const.dart';
+import 'package:flutter_rustore_update/flutter_rustore_update.dart';
 import 'package:version/version.dart';
 import 'package:vozovoz_app_updater/remote/data_source/dto/object_response.dart';
 
@@ -22,4 +24,8 @@ abstract class RemoteStoreDataSource {
     String applicationId, {
     String countryCode = 'RU',
   });
+
+  Future<ObjectResponse<bool, dynamic>> fetchRustroreUpdate();
+
+  Future<ObjectResponse<void, dynamic>> rustorePerformImmediateUpdate();
 }
