@@ -5,26 +5,50 @@ import 'package:version/version.dart';
 class VersionParseUtil {
   VersionParseUtil._();
 
-  static Version? plyStoreVersion(String html) {
+  /// Разбирает версию, допуская сокращённую запись (`1.2` -> `1.2.0`) и лишние
+  /// пробелы. Возвращает `null`, если строка не похожа на версию, — вместо
+  /// [FormatException] из `Version.parse`.
+  static Version? tryParse(String? raw) {
+    final value = raw?.trim();
+    if (value == null || value.isEmpty) {
+      return null;
+    }
     try {
-      final decodedResults = _decodeResults(html);
-      if (decodedResults == null) {
+      return Version.parse(value);
+    } on FormatException {
+      // Часто встречающийся случай: "1.2" или "1" без patch-компонента.
+      final match = RegExp(r'^(\d+)(?:\.(\d+))?(?:\.(\d+))?').firstMatch(value);
+      if (match == null) {
         return null;
       }
+      return Version(
+        int.parse(match.group(1)!),
+        int.parse(match.group(2) ?? '0'),
+        int.parse(match.group(3) ?? '0'),
+      );
+    }
+  }
+
+  static Version? playStoreVersion(String html) {
+    final decodedResults = _decodeResults(html);
+    if (decodedResults == null) {
+      return null;
+    }
+    try {
       final additionalInfoElements =
           decodedResults.getElementsByClassName('hAyfc');
       final versionElement = additionalInfoElements.firstWhere(
-        (elm) => elm.querySelector('.BgcNfc')!.text == 'Current Version',
+        (elm) => elm.querySelector('.BgcNfc')?.text == 'Current Version',
       );
-      final storeVersion = versionElement.querySelector('.htlgb')!.text;
-      return Version.parse(storeVersion);
-    } catch (e) {
-      final decodedResults = _decodeResults(html);
-      if (decodedResults == null) {
-        return null;
+      final storeVersion = versionElement.querySelector('.htlgb')?.text;
+      final parsed = tryParse(storeVersion);
+      if (parsed != null) {
+        return parsed;
       }
-      return _redesignedVersion(decodedResults);
+    } catch (_) {
+      // Старая вёрстка не найдена — пробуем новую ниже.
     }
+    return _redesignedVersion(decodedResults);
   }
 
   static Document? _decodeResults(String jsonResponse) {
@@ -73,7 +97,7 @@ class VersionParseUtil {
       final storeVersion = versionElement.substring(
           storeVersionStartIndex, storeVersionEndIndex);
 
-      return Version.parse(storeVersion);
+      return tryParse(storeVersion);
     } catch (e) {
       return null;
     }

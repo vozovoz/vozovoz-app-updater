@@ -2,8 +2,10 @@ part of 'updater_repository.dart';
 
 class UpdaterRepositoryImpl implements UpdaterRepository {
   final RemoteStoreDataSource _remoteStoreDataSource = RemoteStoreDataSource();
-  final MethodChannelVozovozAppUpdater _methodChannel =
-      MethodChannelVozovozAppUpdater();
+
+  /// Идём через `instance`, а не через `MethodChannelVozovozAppUpdater()`
+  /// напрямую: иначе подмена платформы (в том числе в тестах) не работает.
+  VozovozAppUpdaterPlatform get _platform => VozovozAppUpdaterPlatform.instance;
 
   @override
   Future<UpdateAvailability> checkUpdate(
@@ -39,7 +41,7 @@ class UpdaterRepositoryImpl implements UpdaterRepository {
   }
 
   Future<UpdateAvailability> checkAndroidUpdateFromGoogleService() async {
-    final result = await _methodChannel.checkUpdateGoogleService();
+    final result = await _platform.checkUpdateGoogleService();
     if (result.isSuccessful) {
       final info = result.data!;
       return info.updateAvailability;
@@ -85,6 +87,10 @@ class UpdaterRepositoryImpl implements UpdaterRepository {
 
   Future<UpdateAvailability> checkRustoreVersion() async {
     final result = await _remoteStoreDataSource.fetchRustroreUpdate();
+    if (result.isError) {
+      // Ошибка обращения к RuStore — это не «обновлений нет».
+      return UpdateAvailability.unknown;
+    }
     if (result.data == true) {
       return UpdateAvailability.updateAvailableRustore;
     }
@@ -93,25 +99,34 @@ class UpdaterRepositoryImpl implements UpdaterRepository {
 
   @override
   Future<void> completeFlexibleUpdate() {
-    return _methodChannel.completeFlexibleUpdate();
+    return _platform.completeFlexibleUpdate();
   }
 
   @override
   Future<AppUpdateResult> performImmediateUpdate() {
-    return _methodChannel.performImmediateUpdate();
+    return _platform.performImmediateUpdate();
   }
 
   @override
   Future<AppUpdateResult> startFlexibleUpdate() {
-    return _methodChannel.startFlexibleUpdate();
+    return _platform.startFlexibleUpdate();
   }
 
   @override
   Future<AppUpdateResult> performRustoreImmediateUpdate() async {
     final result = await _remoteStoreDataSource.rustorePerformImmediateUpdate();
-    if (result.isSuccessful) {
-      return AppUpdateResult.success;
+    if (!result.isSuccessful) {
+      return AppUpdateResult.inAppUpdateFailed;
     }
-    return AppUpdateResult.inAppUpdateFailed;
+    switch (result.data) {
+      case ACTIVITY_RESULT_OK:
+        return AppUpdateResult.success;
+      // Раньше отмена пользователем возвращалась как success, из-за чего
+      // вызывающий код считал, что приложение обновилось.
+      case ACTIVITY_RESULT_CANCELED:
+        return AppUpdateResult.userDeniedUpdate;
+      default:
+        return AppUpdateResult.inAppUpdateFailed;
+    }
   }
 }

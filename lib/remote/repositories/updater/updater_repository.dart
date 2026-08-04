@@ -1,8 +1,9 @@
+import 'package:flutter_rustore_update/const.dart';
 import 'package:version/version.dart';
 import 'package:vozovoz_app_updater/remote/data/app_installation_source.dart';
 import 'package:vozovoz_app_updater/remote/data/app_update_result.dart';
 import 'package:vozovoz_app_updater/remote/data_source/index.dart';
-import 'package:vozovoz_app_updater/remote/data_source/platform/vozovoz_app_updater_method_channel.dart';
+import 'package:vozovoz_app_updater/remote/data_source/platform/vozovoz_app_updater_platform_interface.dart';
 
 import '../../data/update_availability.dart';
 

@@ -7,32 +7,53 @@ class ItunesDto {
   });
 
   factory ItunesDto.fromRawJson(String str) =>
-      ItunesDto.fromJson(json.decode(str));
+      ItunesDto.fromJson(json.decode(str) as Map<String, dynamic>);
 
-  factory ItunesDto.fromJson(Map<String, dynamic> json) => ItunesDto(
-        resultCount: json['resultCount'],
-        results: json['results'] != null
-            ? List<Result>.from(json['results'].map((x) => Result.fromJson(x)))
-            : <Result>[],
-      );
+  /// Dio отдаёт уже разобранный JSON, а при `ResponseType.plain` — строку.
+  /// Поддерживаем оба варианта, чтобы разбор не зависел от настроек клиента.
+  factory ItunesDto.fromResponse(Object? payload) {
+    if (payload is String) {
+      return ItunesDto.fromRawJson(payload);
+    }
+    if (payload is Map) {
+      return ItunesDto.fromJson(Map<String, dynamic>.from(payload));
+    }
+    return ItunesDto(resultCount: 0, results: const <ItunesResult>[]);
+  }
+
+  factory ItunesDto.fromJson(Map<String, dynamic> json) {
+    final rawResults = json['results'];
+    return ItunesDto(
+      resultCount: json['resultCount'] as int? ?? 0,
+      results: rawResults is List
+          ? rawResults
+              .whereType<Map>()
+              .map((x) => ItunesResult.fromJson(Map<String, dynamic>.from(x)))
+              .toList()
+          : const <ItunesResult>[],
+    );
+  }
+
   final int resultCount;
-  final List<Result> results;
+  final List<ItunesResult> results;
 }
 
-class Result {
-  Result({
+class ItunesResult {
+  const ItunesResult({
     required this.version,
     required this.wrapperType,
     required this.userRatingCount,
   });
 
-  factory Result.fromRawJson(String str) => Result.fromJson(json.decode(str));
+  factory ItunesResult.fromRawJson(String str) =>
+      ItunesResult.fromJson(json.decode(str) as Map<String, dynamic>);
 
-  factory Result.fromJson(Map<String, dynamic> json) => Result(
-        version: json['version'],
-        wrapperType: json['wrapperType'],
-        userRatingCount: json['userRatingCount'],
+  factory ItunesResult.fromJson(Map<String, dynamic> json) => ItunesResult(
+        version: json['version'] as String? ?? '',
+        wrapperType: json['wrapperType'] as String? ?? '',
+        userRatingCount: json['userRatingCount'] as int? ?? 0,
       );
+
   final String version;
   final String wrapperType;
   final int userRatingCount;

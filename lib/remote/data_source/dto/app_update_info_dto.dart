@@ -15,16 +15,15 @@ class AppUpdateInfoDto {
 
   factory AppUpdateInfoDto.fromMap(Map<String, dynamic> json) {
     return AppUpdateInfoDto(
-      updateAvailability: UpdateAvailability.values
-          .firstWhere((element) => element.index == json['updateAvailability']),
-      immediateUpdateAllowed: json['immediateAllowed'],
-      flexibleUpdateAllowed: json['flexibleAllowed'],
-      availableVersionCode: json['availableVersionCode'],
-      installStatus: InstallStatus.values
-          .firstWhere((element) => element.value == json['installStatus']),
-      packageName: json['packageName'],
-      clientVersionStalenessDays: json['clientVersionStalenessDays'],
-      updatePriority: json['updatePriority'],
+      updateAvailability:
+          UpdateAvailability.fromPlayCore(json['updateAvailability']),
+      immediateUpdateAllowed: json['immediateAllowed'] == true,
+      flexibleUpdateAllowed: json['flexibleAllowed'] == true,
+      availableVersionCode: json['availableVersionCode'] as int?,
+      installStatus: InstallStatus.fromPlayCore(json['installStatus']),
+      packageName: json['packageName'] as String? ?? '',
+      clientVersionStalenessDays: json['clientVersionStalenessDays'] as int?,
+      updatePriority: json['updatePriority'] as int? ?? 0,
     );
   }
 

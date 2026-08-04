@@ -1,5 +1,5 @@
 import 'package:vozovoz_app_updater/remote/data/package_detail.dart';
-import 'package:vozovoz_app_updater/remote/data_source/platform/vozovoz_app_updater_method_channel.dart';
+import 'package:vozovoz_app_updater/remote/data_source/platform/vozovoz_app_updater_platform_interface.dart';
 
 part 'package_repository_impl.dart';
 

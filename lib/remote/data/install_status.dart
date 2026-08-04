@@ -10,4 +10,13 @@ enum InstallStatus {
 
   const InstallStatus(this.value);
   final int value;
+
+  /// Маппинг кодов `com.google.android.play.core.install.model.InstallStatus`.
+  /// Неизвестный код не должен ронять разбор ответа.
+  static InstallStatus fromPlayCore(Object? value) {
+    return InstallStatus.values.firstWhere(
+      (element) => element.value == value,
+      orElse: () => InstallStatus.unknown,
+    );
+  }
 }

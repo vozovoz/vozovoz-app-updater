@@ -2,11 +2,13 @@ class ObjectResponse<T, E> {
   final _ResponseStatus? _responseStatus;
   final T? data;
   final E? error;
+  final int? statusCode;
 
   const ObjectResponse._(
     this._responseStatus, {
     this.data,
     this.error,
+    this.statusCode,
   });
 
   const ObjectResponse.success({T? data})
@@ -16,7 +18,7 @@ class ObjectResponse<T, E> {
         );
 
   const ObjectResponse.error({E? error, int? statusCode})
-      : this._(_ResponseStatus.error, error: error);
+      : this._(_ResponseStatus.error, error: error, statusCode: statusCode);
 
   bool get isSuccessful => _responseStatus == _ResponseStatus.success;
 
@@ -29,10 +31,11 @@ class ObjectResponse<T, E> {
           runtimeType == other.runtimeType &&
           _responseStatus == other._responseStatus &&
           data == other.data &&
-          error == other.error;
+          error == other.error &&
+          statusCode == other.statusCode;
 
   @override
-  int get hashCode => data.hashCode ^ error.hashCode ^ _responseStatus.hashCode;
+  int get hashCode => Object.hash(_responseStatus, data, error, statusCode);
 }
 
 enum _ResponseStatus {

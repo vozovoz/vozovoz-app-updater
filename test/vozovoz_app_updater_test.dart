@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
-import 'package:vozovoz_app_updater/remote/data/app_update_result.dart';
 import 'package:vozovoz_app_updater/remote/data_source/dto/app_update_info_dto.dart';
 import 'package:vozovoz_app_updater/remote/data_source/dto/object_response.dart';
 import 'package:vozovoz_app_updater/remote/data_source/platform/vozovoz_app_updater_method_channel.dart';
